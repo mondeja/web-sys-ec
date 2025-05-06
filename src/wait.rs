@@ -37,9 +37,7 @@ impl From<std::time::Duration> for WaitOptions {
 }
 
 impl From<(std::time::Duration, std::time::Duration)> for WaitOptions {
-    fn from(
-        (duration, poll_frecuency): (std::time::Duration, std::time::Duration),
-    ) -> Self {
+    fn from((duration, poll_frecuency): (std::time::Duration, std::time::Duration)) -> Self {
         Self {
             duration,
             poll_frecuency,
@@ -65,7 +63,7 @@ pub struct Waiter {
 
 impl Waiter {
     pub async fn until(self, condition: impl Into<Condition>) {
-        crate::until_impl(condition.into(), self).await
+        crate::until_impl(condition.into(), self).await;
     }
 }
 

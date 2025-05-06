@@ -23,17 +23,14 @@ impl From<Ec> for Condition {
 }
 
 #[doc(hidden)]
-pub async fn until_impl(condition: Condition, waiter: Waiter)
-{
+pub async fn until_impl(condition: Condition, waiter: Waiter) {
     let conditioner = Conditioner {
         condition,
         waiter,
         until_negative: false,
     };
     match condition.ec {
-        Ec::InnerTextContains(_) => {
-            conditioner.wait_for_object::<web_sys::HtmlElement>().await
-        }
+        Ec::InnerTextContains(_) => conditioner.wait_for_object::<web_sys::HtmlElement>().await,
     }
 }
 
@@ -52,8 +49,7 @@ impl Conditioner {
         let by = self.condition.by.as_ref().unwrap();
         let waiter_fn: Box<dyn Fn() -> Option<T>> = match by {
             By::Id(id) => Box::new(move || {
-                let maybe_element =
-                    document().get_element_by_id(&id.to_string());
+                let maybe_element = document().get_element_by_id(&id.to_string());
                 if let Some(element) = maybe_element {
                     if let Ok(element) = element.dyn_into::<T>() {
                         Some(element)
@@ -123,9 +119,10 @@ impl Conditioner {
         let start = js_sys::Date::now();
         while js_sys::Date::now() - start < duration.as_millis() as f64 {
             if let Some(ref element) = waiter_fn() {
-                if ec_fn(element) {
-                    return;
-                } else if self.until_negative {
+                let expected_condition_match = ec_fn(element);
+                if (self.until_negative && !expected_condition_match)
+                    || (!self.until_negative && expected_condition_match)
+                {
                     return;
                 }
             }
