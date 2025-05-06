@@ -1,0 +1,18 @@
+[package]
+name = "web-sys-ec"
+edition = "2021"
+version = "0.0.1"
+publish = true
+readme = "README.md"
+description = "Expected conditions in Selenium-like style for WASM targets using web-sys."
+repository = "https://github.com/mondeja/web-sys-ec"
+authors = ["Álvaro Mondéjar Rubio"]
+license = "MIT"
+keywords = ["wasm", "testing", "test"]
+categories = ["wasm"]
+
+[dependencies]
+js-sys = ">=0.3"
+web-sys = { version = ">=0.3", features = ["Element", "Document", "HtmlCollection"] }
+gloo-timers = { version = ">=0.3", features = ["futures"] }
+gloo-utils = ">=0.2"

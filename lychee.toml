@@ -1,0 +1,4 @@
+exclude = [
+  '^https://github\.com/mondeja/web-sys-ec/compare',
+]
+exclude_path = ["lychee.toml"]
