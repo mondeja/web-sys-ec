@@ -75,12 +75,12 @@
 //! Wait(1).until(Ec::LocalStorageAttributeValueIs("language","es")).await;
 //! ```
 //!
-//! Wait 1 second for a `<p>` HTML element to exist in the DOM:
+//! Wait 200 milliseconds for a `<p id="foo">` HTML element to exist in the DOM:
 //!
 //! ```rust,ignore
 //! use web_sys_ec::{By, Wait};
 //!
-//! Wait(1).until(By::TagName("p")).await;
+//! Wait(0.2).until("p#foo").await;
 //! ```
 //!
 //! If a condition is not met, it will panic with a message like:
