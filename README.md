@@ -1,5 +1,11 @@
 # web-sys-ec
 
+[![Crates.io](https://img.shields.io/crates/v/web-sys-ec?logo=rust)](https://crates.io/crates/web-sys-ec)
+[![License](https://img.shields.io/crates/l/web-sys-ec?logo=mit)](https://github.com/mondeja/web-sys-ec/blob/master/LICENSE)
+[![Tests](https://img.shields.io/github/actions/workflow/status/mondeja/web-sys-ec/ci.yml?label=tests&logo=github)](https://github.com/mondeja/web-sys-ec/actions)
+[![docs.rs](https://img.shields.io/docsrs/web-sys-ec?logo=docs.rs)](https://docs.rs/web-sys-ec)
+[![Crates.io downloads](https://img.shields.io/crates/d/web-sys-ec)](https://crates.io/crates/web-sys-ec)
+
 Expected conditions in Selenium-like style for WASM targets using [`web-sys`].
 
 ## Rationale
@@ -41,8 +47,8 @@ use web_sys_ec::{By, Ec, Wait};
 
 Wait(10)
     .until((
-        By::TagName("p".into()),
-        Ec::InnerTextContains("Select a language:".into()),
+        By::TagName("p"),
+        Ec::InnerTextContains("Select a language:"),
     ))
     .await;
 ```
@@ -55,8 +61,8 @@ use web_sys_ec::{By, Ec, Wait};
 
 Wait(1)
     .until((
-        By::TagName("html".into()),
-        Ec::AttributeValueIs("lang".into(), "es".into()),
+        By::TagName("html"),
+        Ec::AttributeValueIs("lang", "es"),
     ))
     .await;
 ```
@@ -66,12 +72,7 @@ Wait 1 second for the local storage to have the `language` key set to `"es"`:
 ```rust
 use web_sys_ec::{Ec, Wait};
 
-Wait(1)
-    .until(Ec::LocalStorageAttributeValueIs(
-        "language".into(),
-        "es".into(),
-    ))
-    .await;
+Wait(1).until(Ec::LocalStorageAttributeValueIs("language","es")).await;
 ```
 
 If a condition is not met, it will panic with a message like:
