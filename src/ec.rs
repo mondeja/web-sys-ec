@@ -63,9 +63,9 @@ pub mod Ec {
     /// The property `innerText` of an element contains the given text.
     ///
     /// ```rust,ignore
-    /// use web_sys_ec::{By, Ec, Wait};
+    /// use web_sys_ec::{Ec, Wait};
     ///
-    /// Wait(1).until((By::TagName("p"), Ec::InnerTextContains("text")));
+    /// Wait(1).until(("p", Ec::InnerTextContains("text")));
     /// ```
     #[inline]
     pub fn InnerTextContains(text: impl Into<String>) -> inner::Ec {
@@ -75,9 +75,9 @@ pub mod Ec {
     /// The attribute value of an element is equal to the given value.
     ///
     /// ```rust,ignore
-    /// use web_sys_ec::{By, Ec, Wait};
+    /// use web_sys_ec::{Ec, Wait};
     ///
-    /// Wait(1).until((By::TagName("p"), Ec::AttributeValueIs("attr", "value")));
+    /// Wait(1).until(("p", Ec::AttributeValueIs("attr", "value")));
     /// ```
     #[inline]
     pub fn AttributeValueIs(attr: impl Into<String>, value: impl Into<String>) -> inner::Ec {

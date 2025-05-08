@@ -1,4 +1,4 @@
-use crate::{Condition, WaitOptions};
+use crate::{until_impl, until_not_impl, Condition, WaitOptions};
 
 /// Wait for a condition to be met.
 ///
@@ -24,13 +24,32 @@ pub struct Wait {
 }
 
 impl Wait {
-    // Track caller for async functions only working on nightly activating
-    // the feature flag `async_fn_track_caller`.
+    /// Wait until the given condition is met.
+    ///
+    /// Panics with a detailed error message if the condition is not met
+    /// in the given time.
     #[allow(ungated_async_fn_track_caller)]
     #[track_caller]
     #[allow(private_bounds)]
     pub async fn until(self, condition: impl Into<Condition>) {
-        crate::until_impl(
+        until_impl(
+            condition.into(),
+            self,
+            #[cfg(feature = "nightly")]
+            std::panic::Location::caller(),
+        )
+        .await;
+    }
+
+    /// Wait until the given condition is not met.
+    ///
+    /// Panics with a detailed error message if the condition is still
+    /// meeting when the given time expires.
+    #[allow(ungated_async_fn_track_caller)]
+    #[track_caller]
+    #[allow(private_bounds)]
+    pub async fn until_not(self, condition: impl Into<Condition>) {
+        until_not_impl(
             condition.into(),
             self,
             #[cfg(feature = "nightly")]

@@ -1,24 +1,6 @@
-use crate::{by::inner::By, ec::inner::Ec, Waiter as Wait};
+use crate::{by::inner::By, ec::inner::Ec, Condition, Waiter as Wait};
 use std::boxed::Box;
 use web_sys::wasm_bindgen::JsCast;
-
-#[derive(Debug)]
-pub(crate) struct Condition {
-    pub(crate) by: Option<By>,
-    pub(crate) ec: Ec,
-}
-
-impl From<(By, Ec)> for Condition {
-    fn from((by, ec): (By, Ec)) -> Self {
-        Condition { by: Some(by), ec }
-    }
-}
-
-impl From<Ec> for Condition {
-    fn from(ec: Ec) -> Self {
-        Condition { by: None, ec }
-    }
-}
 
 pub(crate) async fn until_impl(
     condition: Condition,
@@ -28,7 +10,23 @@ pub(crate) async fn until_impl(
     Conditioner {
         condition,
         wait,
-        until_negative: false,
+        negative_until: false,
+        #[cfg(feature = "nightly")]
+        caller_location: *caller_location,
+    }
+    .resolve()
+    .await;
+}
+
+pub(crate) async fn until_not_impl(
+    condition: Condition,
+    wait: Wait,
+    #[cfg(feature = "nightly")] caller_location: &std::panic::Location<'static>,
+) {
+    Conditioner {
+        condition,
+        wait,
+        negative_until: true,
         #[cfg(feature = "nightly")]
         caller_location: *caller_location,
     }
@@ -40,7 +38,7 @@ pub(crate) async fn until_impl(
 pub(crate) struct Conditioner {
     condition: Condition,
     wait: Wait,
-    until_negative: bool,
+    negative_until: bool,
     #[cfg(feature = "nightly")]
     caller_location: std::panic::Location<'static>,
 }
@@ -48,12 +46,19 @@ pub(crate) struct Conditioner {
 impl Conditioner {
     pub(crate) async fn resolve(&self) {
         match self.condition.ec {
-            Ec::InnerTextContains(_) => self.wait_for_object::<web_sys::HtmlElement>().await,
-            Ec::AttributeValueIs(_, _) => self.wait_for_object::<web_sys::Element>().await,
-            Ec::LocalStorageAttributeValueIs(_, _) => {
+            None => match self.condition.by.as_ref() {
+                None => {
+                    // TODO: better error message
+                    panic!("Expected condition is not set");
+                }
+                Some(_) => self.wait_for_object::<web_sys::Node>().await,
+            },
+            Some(Ec::InnerTextContains(_)) => self.wait_for_object::<web_sys::HtmlElement>().await,
+            Some(Ec::AttributeValueIs(_, _)) => self.wait_for_object::<web_sys::Element>().await,
+            Some(Ec::LocalStorageAttributeValueIs(_, _)) => {
                 self.wait_for_object::<web_sys::Storage>().await;
             }
-            Ec::LocationSearchIs(_) => self.wait_for_object::<web_sys::Location>().await,
+            Some(Ec::LocationSearchIs(_)) => self.wait_for_object::<web_sys::Location>().await,
         }
     }
 
@@ -63,7 +68,7 @@ impl Conditioner {
     {
         let waiter_fn: Box<dyn Fn() -> Option<T>> = match self.condition.by.as_ref() {
             None => Box::new(move || match self.condition.ec {
-                Ec::LocalStorageAttributeValueIs(_, _) => {
+                Some(Ec::LocalStorageAttributeValueIs(_, _)) => {
                     if let Some(window) = web_sys::window() {
                         if let Ok(Some(local_storage)) = window.local_storage() {
                             if let Ok(storage) = local_storage.dyn_into::<T>() {
@@ -78,7 +83,7 @@ impl Conditioner {
                         None
                     }
                 }
-                Ec::LocationSearchIs(_) => {
+                Some(Ec::LocationSearchIs(_)) => {
                     if let Some(window) = web_sys::window() {
                         if let Ok(location) = window.location().dyn_into::<T>() {
                             Some(location)
@@ -178,12 +183,13 @@ impl Conditioner {
         };
 
         let ec_fn: Box<dyn Fn(&T) -> bool> = match self.condition.ec {
-            Ec::InnerTextContains(ref text) => Box::new(move |element: &T| {
+            None => Box::new(move |_| true),
+            Some(Ec::InnerTextContains(ref text)) => Box::new(move |element: &T| {
                 let element = element.unchecked_ref::<web_sys::HtmlElement>();
                 let inner_text = element.inner_text();
                 inner_text.contains(text)
             }),
-            Ec::AttributeValueIs(ref attribute, ref value) => Box::new(move |element: &T| {
+            Some(Ec::AttributeValueIs(ref attribute, ref value)) => Box::new(move |element: &T| {
                 let element = element.unchecked_ref::<web_sys::Element>();
                 let attribute_value = element.get_attribute(attribute);
                 if let Some(attribute_value) = attribute_value {
@@ -192,7 +198,7 @@ impl Conditioner {
                     false
                 }
             }),
-            Ec::LocalStorageAttributeValueIs(ref attribute, ref value) => {
+            Some(Ec::LocalStorageAttributeValueIs(ref attribute, ref value)) => {
                 Box::new(move |storage: &T| {
                     let storage = storage.unchecked_ref::<web_sys::Storage>();
                     let attribute_value = storage.get_item(attribute);
@@ -203,7 +209,7 @@ impl Conditioner {
                     }
                 })
             }
-            Ec::LocationSearchIs(ref value) => Box::new(move |location: &T| {
+            Some(Ec::LocationSearchIs(ref value)) => Box::new(move |location: &T| {
                 let location = location.unchecked_ref::<web_sys::Location>();
                 if let Ok(search) = location.search() {
                     search == *value
@@ -222,16 +228,25 @@ impl Conditioner {
         while js_sys::Date::now() - start < duration.as_millis() as f64 {
             if let Some(ref element) = waiter_fn() {
                 let expected_condition_match = ec_fn(element);
-                if (self.until_negative && !expected_condition_match)
-                    || (!self.until_negative && expected_condition_match)
+                if (self.negative_until && !expected_condition_match)
+                    || (!self.negative_until && expected_condition_match)
                 {
                     return;
                 }
+            } else if self.negative_until {
+                return;
             }
             number_of_attempts += 1;
             gloo_timers::future::sleep(poll_frecuency).await;
         }
 
+        // TODO:
+        //   - If there is a `By` selector and the until is positive,
+        //     try to match the element with the selector and print it
+        //     in the panic message either it is found or not.
+        //   - If there is a `By` selector and the until is negative,
+        //     try to match the element with the selector and print it
+        //     in the panic message either it is found or not.
         panic!(
             concat!(
                 "\n",
@@ -251,10 +266,13 @@ impl Conditioner {
             },
             {
                 let mut display = String::new();
+
                 if let Some(ref by) = self.condition.by {
                     display.push_str(&format!("  - Selector: {by}\n"));
                 }
-                display.push_str(&format!("  - Condition: {}\n", self.condition.ec));
+                if let Some(ref ec) = self.condition.ec {
+                    display.push_str(&format!("  - Condition: {ec}\n"));
+                }
                 display
             },
             duration,
