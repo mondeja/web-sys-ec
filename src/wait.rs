@@ -25,6 +25,27 @@ impl From<(u64, u64)> for WaitOptions {
     }
 }
 
+impl From<f64> for WaitOptions {
+    fn from(seconds: f64) -> Self {
+        let millis = (seconds * 1000.0).round() as u64;
+        Self {
+            duration: std::time::Duration::from_millis(millis),
+            poll_frecuency: std::time::Duration::from_millis(millis / 50),
+        }
+    }
+}
+
+impl From<(f64, f64)> for WaitOptions {
+    fn from((seconds, poll_frecuency): (f64, f64)) -> Self {
+        let millis = (seconds * 1000.0).round() as u64;
+        let poll_millis = (poll_frecuency * 1000.0).round() as u64;
+        Self {
+            duration: std::time::Duration::from_millis(millis),
+            poll_frecuency: std::time::Duration::from_millis(poll_millis),
+        }
+    }
+}
+
 impl From<std::time::Duration> for WaitOptions {
     fn from(duration: std::time::Duration) -> Self {
         Self {

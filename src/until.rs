@@ -1,4 +1,4 @@
-use crate::{By, Ec, WaitOptions, Waiter as Wait};
+use crate::{by::inner::By, ec::inner::Ec, WaitOptions, Waiter as Wait};
 use std::boxed::Box;
 use web_sys::wasm_bindgen::JsCast;
 
