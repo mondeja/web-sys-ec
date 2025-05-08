@@ -8,11 +8,22 @@ description = "Expected conditions in Selenium-like style for WASM targets using
 repository = "https://github.com/mondeja/web-sys-ec"
 authors = ["Álvaro Mondéjar Rubio"]
 license = "MIT"
-keywords = ["wasm", "testing", "test"]
+keywords = ["wasm", "testing", "web-sys"]
 categories = ["wasm"]
 
 [dependencies]
 js-sys = ">=0.3"
-web-sys = { version = ">=0.3", features = ["Element", "Document", "HtmlCollection"] }
+web-sys = { version = ">=0.3", features = [
+  "Window",
+  "Element",
+  "HtmlElement",
+  "Document",
+  "HtmlCollection",
+  "Storage",
+  "Location",
+] }
 gloo-timers = { version = ">=0.3", features = ["futures"] }
-gloo-utils = ">=0.2"
+
+[features]
+default = []
+nightly = []

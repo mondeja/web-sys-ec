@@ -46,24 +46,35 @@ impl From<(std::time::Duration, std::time::Duration)> for WaitOptions {
 }
 
 #[allow(non_snake_case)]
-pub fn Wait<T>(options: T) -> Waiter
+pub fn Wait<T>(options: T) -> Wait
 where
     T: Into<WaitOptions>,
 {
-    Waiter {
+    Wait {
         options: options.into(),
     }
 }
 
 #[doc(hidden)]
 #[derive(Debug)]
-pub struct Waiter {
+pub struct Wait {
     pub(crate) options: WaitOptions,
 }
 
-impl Waiter {
+impl Wait {
+    // Track caller for async functions only working on nightly activating
+    // the feature flag `async_fn_track_caller`.
+    #[allow(ungated_async_fn_track_caller)]
+    #[track_caller]
+    #[allow(private_bounds)]
     pub async fn until(self, condition: impl Into<Condition>) {
-        crate::until_impl(condition.into(), self).await;
+        crate::until_impl(
+            condition.into(),
+            self,
+            #[cfg(feature = "nightly")]
+            std::panic::Location::caller(),
+        )
+        .await;
     }
 }
 
