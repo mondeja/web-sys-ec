@@ -1,4 +1,4 @@
-use crate::{by::inner::By, ec::inner::Ec, WaitOptions, Waiter as Wait};
+use crate::{by::inner::By, ec::inner::Ec, Waiter as Wait};
 use std::boxed::Box;
 use web_sys::wasm_bindgen::JsCast;
 
@@ -49,7 +49,7 @@ impl Conditioner {
     pub(crate) async fn resolve(&self) {
         match self.condition.ec {
             Ec::InnerTextContains(_) => self.wait_for_object::<web_sys::HtmlElement>().await,
-            Ec::AttributeValueIs(_, _) => self.wait_for_object::<web_sys::HtmlElement>().await,
+            Ec::AttributeValueIs(_, _) => self.wait_for_object::<web_sys::Element>().await,
             Ec::LocalStorageAttributeValueIs(_, _) => {
                 self.wait_for_object::<web_sys::Storage>().await;
             }
@@ -184,7 +184,7 @@ impl Conditioner {
                 inner_text.contains(text)
             }),
             Ec::AttributeValueIs(ref attribute, ref value) => Box::new(move |element: &T| {
-                let element = element.unchecked_ref::<web_sys::HtmlElement>();
+                let element = element.unchecked_ref::<web_sys::Element>();
                 let attribute_value = element.get_attribute(attribute);
                 if let Some(attribute_value) = attribute_value {
                     attribute_value == *value
@@ -213,10 +213,9 @@ impl Conditioner {
             }),
         };
 
-        let WaitOptions {
-            duration,
-            poll_frecuency,
-        } = self.wait.options;
+        let wait_options = &self.wait.options;
+        let duration = wait_options.duration();
+        let poll_frecuency = wait_options.poll_frecuency();
 
         let mut number_of_attempts = 1;
         let start = js_sys::Date::now();

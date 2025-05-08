@@ -55,20 +55,42 @@ pub(crate) mod inner {
     }
 }
 
+/// Conditions to be expected while waiting.
 #[allow(non_snake_case)]
 pub mod Ec {
     use super::inner;
 
+    /// The property `innerText` of an element contains the given text.
+    ///
+    /// ```rust,ignore
+    /// use web_sys_ec::{By, Ec, Wait};
+    ///
+    /// Wait(1).until((By::TagName("p"), Ec::InnerTextContains("text")));
+    /// ```
     #[inline]
     pub fn InnerTextContains(text: impl Into<String>) -> inner::Ec {
         inner::Ec::InnerTextContains(text.into())
     }
 
+    /// The attribute value of an element is equal to the given value.
+    ///
+    /// ```rust,ignore
+    /// use web_sys_ec::{By, Ec, Wait};
+    ///
+    /// Wait(1).until((By::TagName("p"), Ec::AttributeValueIs("attr", "value")));
+    /// ```
     #[inline]
     pub fn AttributeValueIs(attr: impl Into<String>, value: impl Into<String>) -> inner::Ec {
         inner::Ec::AttributeValueIs(attr.into(), value.into())
     }
 
+    /// The localStorage attribute value is equal to the given value.
+    ///
+    /// ```rust,ignore
+    /// use web_sys_ec::{Ec, Wait};
+    ///
+    /// Wait(1).until(Ec::LocalStorageAttributeValueIs("key", "value"));
+    /// ```
     #[inline]
     pub fn LocalStorageAttributeValueIs(
         attr: impl Into<String>,
@@ -77,6 +99,13 @@ pub mod Ec {
         inner::Ec::LocalStorageAttributeValueIs(attr.into(), value.into())
     }
 
+    /// The `window.location.search` is equal to the given value.
+    ///
+    /// ```rust,ignore
+    /// use web_sys_ec::{Ec, Wait};
+    ///
+    /// Wait(1).until(Ec::LocationSearchIs("?key=value"));
+    /// ```
     #[inline]
     pub fn LocationSearchIs(value: impl Into<String>) -> inner::Ec {
         inner::Ec::LocationSearchIs(value.into())
