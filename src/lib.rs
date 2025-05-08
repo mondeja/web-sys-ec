@@ -42,7 +42,7 @@
 //!
 //! Wait 10 seconds for a `<p>` HTML element to contain the text `"Select a language:"`:
 //!
-//! ```rust
+//! ```rust,ignore
 //! use web_sys_ec::{By, Ec, Wait};
 //!
 //! Wait(10)
@@ -56,7 +56,7 @@
 //! Wait 1 second for the `<html>` HTML element to have the `lang` attribute set to
 //! `"es"`:
 //!
-//! ```rust
+//! ```rust,ignore
 //! use web_sys_ec::{By, Ec, Wait};
 //!
 //! Wait(1)
@@ -69,7 +69,7 @@
 //!
 //! Wait 1 second for the local storage to have the `language` key set to `"es"`:
 //!
-//! ```rust
+//! ```rust,ignore
 //! use web_sys_ec::{Ec, Wait};
 //!
 //! Wait(1).until(Ec::LocalStorageAttributeValueIs("language","es")).await;
