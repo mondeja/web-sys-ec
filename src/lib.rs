@@ -75,6 +75,14 @@
 //! Wait(1).until(Ec::LocalStorageAttributeValueIs("language","es")).await;
 //! ```
 //!
+//! Wait 200 milliseconds for a `<p id="foo">` HTML element to exist in the DOM:
+//!
+//! ```rust,ignore
+//! use web_sys_ec::{By, Wait};
+//!
+//! Wait(0.2).until("p#foo").await;
+//! ```
+//!
 //! If a condition is not met, it will panic with a message like:
 //!
 //! <!-- markdownlint-disable MD013 -->
@@ -102,14 +110,16 @@
 //! [`web-sys`]: https://crates.io/crates/web-sys
 
 pub(crate) mod by;
+mod condition;
 pub(crate) mod ec;
 mod until;
 mod wait;
 mod wait_options;
 
 pub use by::By;
+pub(crate) use condition::Condition;
 pub use ec::Ec;
-pub(crate) use until::{until_impl, Condition};
+pub(crate) use until::{until_impl, until_not_impl};
 pub use wait::Wait;
 #[doc(hidden)]
 pub(crate) use wait::Wait as Waiter;

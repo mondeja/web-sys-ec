@@ -27,3 +27,18 @@ gloo-timers = { version = ">=0.3", features = ["futures"] }
 [features]
 default = []
 nightly = []
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+gloo-utils = "0.2"
+web-sys = { version = "0.3", features = [
+  "Window",
+  "Element",
+  "HtmlElement",
+  "Document",
+  "HtmlCollection",
+  "Storage",
+  "Location",
+  "Url",
+  "UrlSearchParams",
+] }
