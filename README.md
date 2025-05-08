@@ -14,11 +14,11 @@ When you test your apps with `wasm-pack test`, you may want to use the
 [`web-sys`] crate to interact with the DOM. This is a great way to test your
 app in a real browser environment.
 
-However, a lot of actions in `web-sys` are asynchronous, and you may want to
-wait for certain conditions to be met before proceeding with your tests. This
-is where the `web-sys-ec` crate comes in.
+However, actions in a browser are asynchronous, and you may want to wait for
+certain conditions to be met while testing. Thisis where the `web-sys-ec`
+crate comes in.
 
-It provides a library to interact with the DOM and wait for certain conditions
+It provides a library to interact with the DOM waiting for certain conditions
 to be met. It is inspired by the Selenium syntax, where you can wait for
 certain expected conditions to be met before proceeding with your tests.
 
