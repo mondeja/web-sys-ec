@@ -39,25 +39,33 @@ pub(crate) mod inner {
     }
 }
 
+/// Selectors for finding elements in the DOM.
+///
+/// Set of selectors for finding elements for which certain expected conditions
+/// can be applied.
 #[allow(non_snake_case)]
 pub mod By {
     use super::inner;
 
+    /// Selects an element by its identifier.
     #[inline]
     pub fn Id(id: impl Into<String>) -> inner::By {
         inner::By::Id(id.into())
     }
 
+    /// Selects an element by its class name.
     #[inline]
     pub fn Class(class: impl Into<String>) -> inner::By {
         inner::By::Class(class.into())
     }
 
+    /// Selects an element by its tag name.
     #[inline]
     pub fn TagName(tag_name: impl Into<String>) -> inner::By {
         inner::By::TagName(tag_name.into())
     }
 
+    /// Selects an element by its CSS selector.
     #[inline]
     pub fn QuerySelector(selector: impl Into<String>) -> inner::By {
         inner::By::QuerySelector(selector.into())
